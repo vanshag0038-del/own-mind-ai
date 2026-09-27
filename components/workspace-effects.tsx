@@ -54,18 +54,12 @@ export function AmbientField() {
   }, [])
   return (
     <div ref={field} className="ambient-field" aria-hidden="true">
-      <div className="ambient-light" />
-      <div className="ambient-wash wash-clay" />
-      <div className="ambient-wash wash-sage" />
-      <svg className="ambient-contours" viewBox="0 0 800 800" fill="none">
-        <g className="contour-orbit">
-          {Array.from({ length: 9 }, (_, i) => (
-            <ellipse key={i} cx="400" cy="400" rx={160 + i * 24} ry={100 + i * 27} transform={`rotate(${i * 7} 400 400)`} />
-          ))}
-        </g>
-      </svg>
-      <div className="ambient-grid" />
-      <div className="ambient-grain" />
+      <div className="ambient-pinpoints" />
+      <div className="ambient-ribbons">
+        <span />
+        <span />
+        <span />
+      </div>
     </div>
   )
 }
