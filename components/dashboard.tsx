@@ -3,6 +3,8 @@ import { FileText, GitBranch, Clock, TriangleAlert, type LucideIcon } from "luci
 import { DecisionChanges } from "@/components/decision-changes"
 import { KnowledgeHealth } from "@/components/knowledge-health"
 import { NeedsAttention } from "@/components/needs-attention"
+import { QuantumNodes } from "@/components/effects/quantum-nodes"
+import { ShootingStarsGrid } from "@/components/effects/shooting-stars-grid"
 import { cn } from "@/lib/utils"
 
 type Stat = {
@@ -54,6 +56,7 @@ export function Dashboard() {
   return (
     <div className="page-container animate-page-enter">
       <header className="overview-hero">
+      <ShootingStarsGrid className="-inset-x-4" />
       <div className="overview-copy">
       {/* Section pill */}
       <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-brand-primary/20 bg-brand-primary/[0.07] px-3 py-1 text-[11px] font-medium text-brand-primary-hover">
@@ -74,6 +77,10 @@ export function Dashboard() {
 
       </div>
 
+      <figure className="relative z-[1] hidden h-[220px] w-[300px] shrink-0 overflow-hidden rounded-[var(--radius)] border border-dashed border-border lg:block">
+        <QuantumNodes nodeCount={46} cursorDistance={120} />
+        <figcaption className="index-label pointer-events-none absolute bottom-2 left-3">Your knowledge graph, local</figcaption>
+      </figure>
       </header>
 
       {/* Stat cards — fill available width, responsive grid */}

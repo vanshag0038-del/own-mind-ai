@@ -76,7 +76,70 @@
   --color-danger: var(--danger);
   --color-info: var(--info);
   --color-ink: var(--ink);
+
+  /* Approval stamp accents (Ledger Direction I) */
+  --color-approval-pending: var(--approval-pending);
+  --color-approval-confirmed: var(--approval-confirmed);
+  --color-approval-confirmed-fg: var(--approval-confirmed-fg);
+  --color-approval-deny: var(--approval-deny);
+  --color-approval-deny-fg: var(--approval-deny-fg);
+
+  /* Herbarium archive room (only resolves inside .herbarium) */
+  --color-herb-bone: var(--herb-bone);
+  --color-herb-ink: var(--herb-ink);
+  --color-herb-moss: var(--herb-moss);
+  --color-herb-oxblood: var(--herb-oxblood);
+  --color-herb-sage: var(--herb-sage);
+  --color-herb-tape: var(--herb-tape);
 }
+
+:root, .dark {
+  --approval-pending: #D98E3F;
+  --approval-confirmed: #2F6E62;
+  --approval-deny: #B4472D;
+  /* Lifted tints so text on the dark shell clears WCAG AA; the raw hues stay for fills and rings. */
+  --approval-confirmed-fg: color-mix(in srgb, #2F6E62 45%, #D6EDE7);
+  --approval-deny-fg: color-mix(in srgb, #B4472D 70%, #F5D5CC);
+}
+:root:not(.dark) {
+  --approval-confirmed-fg: #2F6E62;
+  --approval-deny-fg: #B4472D;
+}
+
+/*
+ * Herbarium is a calm light "archive room" inside the dark app. It re-declares the shared
+ * semantic tokens on its own subtree, so shadcn primitives inside it (Button, Badge) inherit
+ * the local palette while nothing outside the wrapper is affected.
+ */
+.herbarium {
+  --herb-bone: #F1ECE2;
+  --herb-ink: #1C1B19;
+  --herb-moss: #3E5B3A;
+  --herb-oxblood: #7A1F1F;
+  --herb-sage: #DCE3D2;
+  --herb-tape: rgba(214, 190, 128, .55);
+  color-scheme: light;
+  --background: var(--herb-sage);
+  --background-secondary: color-mix(in srgb, var(--herb-sage) 70%, var(--herb-bone));
+  --surface: var(--herb-bone);
+  --surface-elevated: var(--herb-bone);
+  --text-primary: var(--herb-ink);
+  --text-secondary: color-mix(in srgb, var(--herb-ink) 80%, var(--herb-bone));
+  --text-muted: color-mix(in srgb, var(--herb-ink) 64%, var(--herb-bone));
+  --foreground: var(--herb-ink);
+  --brand-primary: var(--herb-moss);
+  --danger: var(--herb-oxblood);
+  --success: var(--herb-moss);
+  --rule: color-mix(in srgb, var(--herb-ink) 18%, transparent);
+  --rule-soft: color-mix(in srgb, var(--herb-ink) 9%, transparent);
+  --border: var(--rule-soft);
+  --hard-shadow: color-mix(in srgb, var(--herb-ink) 22%, transparent);
+  --ring: var(--herb-moss);
+  background: var(--herb-sage);
+  color: var(--herb-ink);
+}
+
+@keyframes grid-breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 
 /* ─── Palette: pistachio paper, oxblood, mustard (light) ─────────────────── */
 :root {
