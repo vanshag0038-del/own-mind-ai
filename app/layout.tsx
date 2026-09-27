@@ -1,7 +1,23 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { Fraunces, Instrument_Sans } from 'next/font/google'
 import './globals.css'
 import { WorkspaceShell } from '@/components/workspace-shell'
+import { ThemeProvider } from '@/components/theme-provider'
+
+const body = Instrument_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const displayFallback = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-display-fallback',
+  style: ['normal', 'italic'],
+  axes: ['opsz', 'SOFT', 'WONK'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'OwnMind AI — Sovereign Second Brain for Project Teams',
@@ -28,8 +44,11 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light',
-  themeColor: '#F6F3EC',
+  colorScheme: 'light dark',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#E7ECDD' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E1712' },
+  ],
 }
 
 export default function RootLayout({
@@ -38,9 +57,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="light">
+    <html lang="en" suppressHydrationWarning className={`${body.variable} ${displayFallback.variable}`}>
       <body className="antialiased">
-        <WorkspaceShell>{children}</WorkspaceShell>
+        <ThemeProvider>
+          <WorkspaceShell>{children}</WorkspaceShell>
+        </ThemeProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
