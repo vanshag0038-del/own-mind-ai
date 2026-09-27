@@ -250,16 +250,17 @@
 .card-accent-warning { --surface-accent: var(--warning); }
 [class*=card-accent-] { border-top: 3px solid var(--surface-accent); }
 .dark .surface-card, .dark .card-sovereign {
+  --surface-glow: oklch(from var(--surface-accent) calc(l * .92) calc(c * .75) h);
   border-color: color-mix(in srgb, var(--surface-accent) 22%, var(--surface));
   border-top-width: 1px;
   border-radius: 12px;
   background: color-mix(in srgb, var(--surface-accent) 3%, var(--surface));
-  box-shadow: 0 0 22px color-mix(in srgb, var(--surface-accent) 7%, transparent), 0 12px 28px #00000020, inset 0 1px 0 color-mix(in srgb, var(--surface-accent) 16%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--surface-glow) 5%, transparent), 0 12px 28px #00000020, inset 0 1px 0 color-mix(in srgb, var(--surface-glow) 12%, transparent);
 }
-.dark .surface-card::after { background: radial-gradient(380px circle at var(--light-x, 85%) var(--light-y, 0%), color-mix(in srgb, var(--surface-accent) 10%, transparent), transparent 80%); opacity: .55; }
+.dark .surface-card::after { background: radial-gradient(380px circle at var(--light-x, 85%) var(--light-y, 0%), color-mix(in srgb, var(--surface-glow) 8%, transparent), transparent 80%); opacity: .55; }
 .dark .surface-card[data-illuminated]::after { opacity: 1; }
 .dark .surface-card:focus-within { outline: 1px solid var(--surface-accent); outline-offset: 3px; }
-.dark .surface-card:hover { border-color: color-mix(in srgb, var(--surface-accent) 55%, var(--surface)); box-shadow: 0 0 32px color-mix(in srgb, var(--surface-accent) 16%, transparent), 0 12px 28px #00000025, inset 0 1px 0 color-mix(in srgb, var(--surface-accent) 28%, transparent); }
+.dark .surface-card:hover { border-color: color-mix(in srgb, var(--surface-accent) 45%, var(--surface)); box-shadow: 0 0 32px color-mix(in srgb, var(--surface-glow) 12%, transparent), 0 12px 28px #00000025, inset 0 1px 0 color-mix(in srgb, var(--surface-glow) 21%, transparent); }
 .dark .metric-card:nth-child(2) { --surface-accent: var(--brand-secondary); }
 .dark .metric-card:nth-child(2) svg { color: var(--brand-secondary); }
 .dark .metric-card:nth-child(3) { --surface-accent: var(--warning); }
