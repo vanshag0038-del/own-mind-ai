@@ -1,5 +1,4 @@
 import { CountUp } from "@/components/workspace-effects"
-import { IntelligenceSculpture } from "@/components/intelligence-sculpture"
 import { FileText, GitBranch, Clock, TriangleAlert, type LucideIcon } from "lucide-react"
 import { DecisionChanges } from "@/components/decision-changes"
 import { KnowledgeHealth } from "@/components/knowledge-health"
@@ -74,7 +73,7 @@ export function Dashboard() {
       </p>
 
       </div>
-      <IntelligenceSculpture />
+
       </header>
 
       {/* Stat cards — fill available width, responsive grid */}
