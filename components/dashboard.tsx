@@ -1,3 +1,4 @@
+import { OverviewPalettePreview } from "@/components/overview-palette-preview"
 import { CountUp } from "@/components/workspace-effects"
 import { IntelligenceSculpture } from "@/components/intelligence-sculpture"
 import { FileText, GitBranch, Clock, TriangleAlert, type LucideIcon } from "lucide-react"
@@ -54,6 +55,7 @@ const accentMap = {
 export function Dashboard() {
   return (
     <div className="page-container animate-page-enter">
+      <OverviewPalettePreview />
       <header className="overview-hero">
       <div className="overview-copy">
       {/* Section pill */}
