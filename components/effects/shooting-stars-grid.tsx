@@ -22,8 +22,8 @@ export function ShootingStarsGrid({
   className,
   gridSize = 44,
   colors = DEFAULT_COLORS,
-  maxActiveStars = 5,
-  spawnEveryMs = [900, 2200],
+  maxActiveStars = 10,
+  spawnEveryMs = [300, 800],
   speedMs = [1800, 3400],
   trailLength = 90,
 }: ShootingStarsGridProps) {
