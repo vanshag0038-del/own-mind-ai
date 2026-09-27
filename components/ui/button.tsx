@@ -1,3 +1,4 @@
+import { Children } from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
@@ -47,15 +48,34 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  children,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+  const lightBulb = variant !== 'ghost' && variant !== 'link'
+  const hasIndicator = lightBulb && !size?.startsWith('icon')
+
   return (
     <ButtonPrimitive
       data-slot="button"
       data-variant={variant}
+      data-light-bulb={lightBulb ? '' : undefined}
+      data-light-indicator={hasIndicator ? '' : undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {hasIndicator && typeof children !== 'function'
+        ? Children.map(children, (child) =>
+            typeof child === 'string' && child.trim() ? (
+              <span className="light-bulb-label">
+                <span className="light-bulb-label-track">
+                  <span>{child}</span>
+                  <span aria-hidden="true">{child}</span>
+                </span>
+              </span>
+            ) : child,
+          )
+        : children}
+    </ButtonPrimitive>
   )
 }
 
