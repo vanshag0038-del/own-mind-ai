@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ArrowUpRight, Clock, TriangleAlert } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { HoldToApprove } from "@/components/approval/hold-to-approve"
+import { StampSurface, type StampVerdict } from "@/components/approval/approval-stamp"
 import { demoDateDecision } from "@/lib/overview-data"
 import { cn } from "@/lib/utils"
 
@@ -35,6 +38,14 @@ const attentionItems = [
 ] as const
 
 export function NeedsAttention() {
+  const [verdicts, setVerdicts] = useState<Record<string, StampVerdict>>({})
+  const [openId, setOpenId] = useState<string | null>(null)
+
+  const decide = (id: string, verdict: StampVerdict) => {
+    setVerdicts((prev) => ({ ...prev, [id]: verdict }))
+    setOpenId(null)
+  }
+
   return (
     <section aria-labelledby="attention-heading" className="mt-10 animate-card-enter stagger-7">
       <div className="mb-4 flex items-center justify-between gap-4">
@@ -49,7 +60,15 @@ export function NeedsAttention() {
 
       <ul className="divide-y divide-[rgba(255,255,255,0.06)] surface-card/80">
         {attentionItems.map(({ id, title, description, status, action, icon: Icon }) => (
-          <li key={id} className="flex flex-wrap items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-brand-primary/[0.04]">
+          <li key={id}>
+          <StampSurface
+            verdict={verdicts[id] ?? null}
+            fresh={Boolean(verdicts[id])}
+            className={cn(
+              "flex flex-wrap items-center gap-4 px-5 py-4 transition-colors duration-150 hover:bg-brand-primary/[0.04]",
+              verdicts[id] && "pr-40",
+            )}
+          >
             <div
               className={cn(
                 "flex size-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset",
@@ -68,7 +87,8 @@ export function NeedsAttention() {
               <p className="text-xs leading-relaxed text-text-muted">{description}</p>
             </div>
 
-            <Dialog>
+            {!verdicts[id] && (
+            <Dialog open={openId === id} onOpenChange={(open) => setOpenId(open ? id : null)}>
               <DialogTrigger render={<Button variant="ghost" size="sm" />}>
                 {action}
                 <ArrowUpRight aria-hidden="true" data-icon="inline-end" />
@@ -110,13 +130,25 @@ export function NeedsAttention() {
                   </div>
                 )}
 
-                <DialogFooter showCloseButton>
-                  <p className="mr-auto self-center text-[11px] text-text-muted">
-                    Static preview · No changes are saved
-                  </p>
+                <DialogFooter showCloseButton={status !== "pending"}>
+                  {status === "pending" ? (
+                    <>
+                      <p className="mr-auto self-center text-[11px] text-text-muted">Preview only · Nothing is saved</p>
+                      <Button variant="ghost" size="sm" onClick={() => decide(id, "denied")} className="text-approval-deny-fg hover:text-approval-deny-fg">
+                        Deny
+                      </Button>
+                      <HoldToApprove onComplete={() => decide(id, "approved")} />
+                    </>
+                  ) : (
+                    <p className="mr-auto self-center text-[11px] text-text-muted">
+                      Static preview · No changes are saved
+                    </p>
+                  )}
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+            )}
+          </StampSurface>
           </li>
         ))}
       </ul>

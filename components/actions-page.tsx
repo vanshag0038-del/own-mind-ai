@@ -33,6 +33,8 @@ import {
 } from "@/lib/actions-data"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { HoldToApprove } from "@/components/approval/hold-to-approve"
+import { StampSurface } from "@/components/approval/approval-stamp"
 
 export function ActionsPage() {
   const [stats, setStats] = useState(initialSummaryStats)
@@ -45,6 +47,7 @@ export function ActionsPage() {
   const [rejectionReason, setRejectionReason] = useState<string>("Not required")
   const [showRejectionOptions, setShowRejectionOptions] = useState(false)
   const [highRiskConfirmed, setHighRiskConfirmed] = useState(false)
+  const [freshStamps, setFreshStamps] = useState<Set<string>>(() => new Set())
 
   const handleOpenReview = (action: ActionItem) => {
     setSelectedAction({ ...action })
@@ -58,20 +61,25 @@ export function ActionsPage() {
     setHighRiskConfirmed(false)
   }
 
-  const handleApprove = () => {
-    if (!selectedAction) return
-    setIsExecuting(true)
+  const syncSelected = (updated: ActionItem) =>
+    setSelectedAction((prev) => (prev?.id === updated.id ? updated : prev))
+
+  const handleApprove = (target: ActionItem | null = selectedAction) => {
+    if (!target || target.status !== "WAITING_APPROVAL") return
+    const fromDrawer = target.id === selectedAction?.id
+    if (fromDrawer) setIsExecuting(true)
 
     setTimeout(() => {
-      setIsExecuting(false)
-      const auditId = selectedAction.auditId || `AUD-${Math.floor(1000 + Math.random() * 9000)}`
+      if (fromDrawer) setIsExecuting(false)
+      const auditId = target.auditId || `AUD-${Math.floor(1000 + Math.random() * 9000)}`
       const updatedAction: ActionItem = {
-        ...selectedAction,
+        ...target,
         status: "EXECUTED",
         executionResult: "Task created successfully",
         auditId,
       }
-      setSelectedAction(updatedAction)
+      syncSelected(updatedAction)
+      setFreshStamps((prev) => new Set(prev).add(updatedAction.id))
 
       // Update pending actions list
       setPendingActions((prev) =>
@@ -90,27 +98,29 @@ export function ActionsPage() {
       const newHistoryItem: ActionHistoryRecord = {
         id: `hist-${Date.now()}`,
         time: "Just now",
-        action: selectedAction.title,
-        decision: selectedAction.title.includes("Demo") ? "Demo Date" : "Data Storage",
+        action: target.title,
+        decision: target.title.includes("Demo") ? "Demo Date" : "Data Storage",
         approval: "Approved",
         result: "Completed",
         auditId,
-        riskLevel: selectedAction.riskLevel,
+        riskLevel: target.riskLevel,
       }
       setHistory((prev) => [newHistoryItem, ...prev])
     }, 450)
   }
 
-  const handleReject = () => {
-    if (!selectedAction) return
+  const handleReject = (target: ActionItem | null = selectedAction, reason: string = rejectionReason) => {
+    if (!target || target.status !== "WAITING_APPROVAL") return
+    const selectedActionForHistory = target
 
     const updatedAction: ActionItem = {
-      ...selectedAction,
+      ...target,
       status: "REJECTED",
-      rejectionReason,
+      rejectionReason: reason,
       executionResult: "No action taken",
     }
-    setSelectedAction(updatedAction)
+    syncSelected(updatedAction)
+    setFreshStamps((prev) => new Set(prev).add(updatedAction.id))
 
     // Update pending actions list
     setPendingActions((prev) =>
@@ -128,12 +138,12 @@ export function ActionsPage() {
     const newHistoryItem: ActionHistoryRecord = {
       id: `hist-${Date.now()}`,
       time: "Just now",
-      action: selectedAction.title,
-      decision: selectedAction.title.includes("Demo") ? "Demo Date" : "Data Storage",
+      action: selectedActionForHistory.title,
+      decision: selectedActionForHistory.title.includes("Demo") ? "Demo Date" : "Data Storage",
       approval: "Rejected",
       result: "No action taken",
-      auditId: selectedAction.auditId || "AUD-REJ",
-      riskLevel: selectedAction.riskLevel,
+      auditId: selectedActionForHistory.auditId || "AUD-REJ",
+      riskLevel: selectedActionForHistory.riskLevel,
     }
     setHistory((prev) => [newHistoryItem, ...prev])
     setShowRejectionOptions(false)
@@ -297,10 +307,12 @@ export function ActionsPage() {
             const isHighRisk = action.riskLevel === "HIGH"
 
             return (
-              <div
+              <StampSurface
                 key={action.id}
+                verdict={isExecuted ? "approved" : isRejected ? "denied" : null}
+                fresh={freshStamps.has(action.id)}
                 className={cn(
-                  "relative flex flex-col justify-between rounded-3xl border bg-surface/80 p-6 transition-all duration-200",
+                  "flex flex-col justify-between rounded-3xl border bg-surface/80 p-6 transition-colors duration-200",
                   isExecuted
                     ? "border-success/30 bg-success/[0.03]"
                     : isRejected
@@ -441,21 +453,47 @@ export function ActionsPage() {
                     <span className="font-mono text-[11px]">{action.tool}</span>
                   </div>
 
-                  <Button
-                    type="button"
-                    variant={isExecuted || isRejected ? "outline" : "default"}
-                    size="sm"
-                    onClick={() => handleOpenReview(action)}
-                    className={cn(
-                      "text-xs gap-1.5",
-                      !isExecuted && !isRejected && "bg-brand-secondary hover:bg-brand-secondary/90 text-primary-foreground",
-                    )}
-                  >
-                    {isExecuted ? "View Audit Details" : isRejected ? "View Rejection Details" : "Review Action"}
-                    <ArrowRight className="size-3.5" />
-                  </Button>
+                  {isExecuted || isRejected ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenReview(action)}
+                      className="text-xs gap-1.5"
+                    >
+                      {isExecuted ? "View Audit Details" : "View Rejection Details"}
+                      <ArrowRight className="size-3.5" />
+                    </Button>
+                  ) : (
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleReject(action, "Not required")}
+                        className="text-xs text-approval-deny-fg hover:text-approval-deny-fg"
+                      >
+                        Deny
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleOpenReview(action)}
+                        className="text-xs"
+                      >
+                        Details
+                      </Button>
+                      <HoldToApprove
+                        onComplete={() => handleApprove(action)}
+                        disabled={isHighRisk}
+                        disabledLabel="Confirm in review"
+                        className="ml-1"
+                      />
+                    </div>
+                  )}
                 </div>
-              </div>
+              </StampSurface>
             )
           })}
         </div>
@@ -781,7 +819,7 @@ export function ActionsPage() {
                       type="button"
                       variant="destructive"
                       size="sm"
-                      onClick={handleReject}
+                      onClick={() => handleReject()}
                       className="text-xs gap-1"
                     >
                       Confirm Rejection
@@ -813,7 +851,7 @@ export function ActionsPage() {
                       variant="default"
                       size="sm"
                       disabled={selectedAction.riskLevel === "HIGH" && !highRiskConfirmed}
-                      onClick={handleApprove}
+                      onClick={() => handleApprove()}
                       className={cn(
                         "flex-1 text-xs font-semibold text-primary-foreground",
                         selectedAction.riskLevel === "HIGH" && !highRiskConfirmed
